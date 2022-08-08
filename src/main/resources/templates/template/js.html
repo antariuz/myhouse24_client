@@ -1,0 +1,16 @@
+<!-- jQuery -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Bootstrap -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.1/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/admin-lte/3.2.0/js/adminlte.min.js"></script>
+
+<!-- Sidebar tab active -->
+<script type="application/javascript">
+    $(function () {
+        var url = window.location;
+        $('ul.nav-sidebar a').filter(function () {
+            if (this.href) return this.href === url || url.href.indexOf(this.href) === 0;
+        }).addClass('active');
+    });
+</script>
