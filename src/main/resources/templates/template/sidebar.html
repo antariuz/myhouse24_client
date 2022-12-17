@@ -1,88 +1,57 @@
 <aside class="main-sidebar elevation-1 sidebar-light-teal">
-    <!-- Brand Logo -->
-    <a href="#" class="brand-link logo-switch text-sm">
+    <a href="/" class="brand-link logo-switch text-sm">
         <img src="/img/logo-mini.svg" alt="Мой Дом 24 Small" class="brand-image-xl logo-xs">
-        <!--   Refactor position of image to center     -->
-        <img src="/img/logo.svg" alt="Мой Дом 24 Large" class="brand-image-xs logo-xl" style="left: 25%">
+        <img src="/img/logo.svg" alt="Мой Дом 24 Large" class="brand-image-xs logo-xl" style="left: 25%;">
     </a>
-    <!-- Sidebar -->
     <div class="sidebar os-theme-dark">
-        <!-- Sidebar Menu -->
-        <nav class="pt-2">
-            <ul class="nav nav-pills nav-sidebar flex-column text-sm nav-collapse-hide-child" data-widget="treeview"
-                role="menu" data-accordion="false">
-                <li class="nav-item">
-                    <a class="nav-link active">
+        <nav class="mt-2">
+            <ul class="nav nav-pills nav-sidebar flex-column text-sm" data-widget="treeview" role="menu" data-accordion="false">
+                <li class="nav-item has-treeview">
+                    <a class="nav-link">
                         <i class="nav-icon fa-solid fa-chart-line"></i>
                         <p>Сводка
                             <i class="fa-solid fa-angle-left right"></i>
                         </p>
                     </a>
-                    <!--        User's flat List             -->
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-
-                        </li>
-                    </ul>
-                    <!--        END of User's flat List   -->
+                    <ul class="nav nav-treeview" id="summary-list"></ul>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item has-treeview">
                     <a class="nav-link">
                         <i class="nav-icon fa-solid fa-file-invoice-dollar"></i>
                         <p>Квитанции
                             <i class="fa-solid fa-angle-left right"></i>
                         </p>
                     </a>
-                    <!--        User's invoice List             -->
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-                            <a class="nav-link">
-                                <i class="nav-icon fa-solid fa-file-invoice-dollar"></i>
-                                <p>Все квитации</p>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-
-                        </li>
-                    </ul>
+                    <ul class="nav nav-treeview" id="invoice-list"></ul>
                 </li>
-                <!--        END of User's flat List   -->
-                <li class="nav-item">
+                <li class="nav-item has-treeview">
                     <a class="nav-link">
                         <i class="nav-icon fa-solid fa-dollar-sign"></i>
                         <p>Тарифы
                             <i class="fa-solid fa-angle-left right"></i>
                         </p>
                     </a>
-                    <!--        User's tariff of flats List             -->
-                    <ul class="nav nav-treeview">
-                        <li class="nav-item">
-
-                        </li>
-                    </ul>
-                    <!--        END of User's flat List   -->
+                    <ul class="nav nav-treeview" id="tariff-list"></ul>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/messages" class="nav-link">
                         <i class="nav-icon fa-solid fa-envelope"></i>
                         <p>Сообщения</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/master-requests" class="nav-link">
                         <i class="nav-icon fa-solid fa-screwdriver-wrench"></i>
                         <p>Вызов мастера</p>
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">
+                    <a href="/profile" class="nav-link">
                         <i class="nav-icon fa-solid fa-circle-user"></i>
                         <p>Профиль</p>
                     </a>
                 </li>
             </ul>
         </nav>
-        <!-- /.sidebar-menu -->
     </div>
-    <!-- /.sidebar -->
 </aside>

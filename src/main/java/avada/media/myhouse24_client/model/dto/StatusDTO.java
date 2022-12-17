@@ -1,0 +1,17 @@
+package avada.media.myhouse24_client.model.dto;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class StatusDTO {
+
+    private String value;
+    private String title;
+
+}

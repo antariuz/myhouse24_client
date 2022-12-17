@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template/index.html}" lang="ru">
+
+<th:block layout:fragment="content">
+
+    <div class="row animate__animated animate__fadeIn" id="table">
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-header">
+                    <button type="button" class="btn btn-sm btn-secondary float-right"
+                            title="Сбросить таблицу" id="reset-table">Очистить
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive-xl table-sm text-center">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col" style="width: 25%">№</th>
+                            <th scope="col" style="width: 25%">Дата</th>
+                            <th scope="col" style="width: 25%">Статус</th>
+                            <th scope="col" style="width: 25%">Сумма</th>
+                        </tr>
+                        </thead>
+                        <thead>
+                        <tr>
+                            <th class="align-middle"></th>
+                            <th class="align-middle">
+                                <input type="date" class="form-control" id="date-filter">
+                            </th>
+                            <th class="align-middle">
+                                <select class="custom-select" id="status-filter">
+                                    <option value=""></option>
+                                </select>
+                            </th>
+                            <th class="align-middle"></th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row animate__animated animate__fadeIn" id="invoice" hidden>
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-header p-2 pr-5">
+                    <button type="button" class="btn btn-sm btn-flat btn-info float-right">
+                        <i class="fa-solid fa-print"></i> Распечатать
+                    </button>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive-xl table-sm text-center">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col" style="width: 18%">#</th>
+                            <th scope="col" style="width: 18%">Услуга</th>
+                            <th scope="col" style="width: 28%">Количество потребления (расход)</th>
+                            <th scope="col" style="width: 18%">Ед. изм.</th>
+                            <th scope="col" style="width: 18%">Цена за ед., грн.</th>
+                            <th scope="col" style="width: 18%">Стоимость, грн.</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                        <tr>
+                            <td colspan="5"></td>
+                            <td style="min-width: 180px;">
+                                <div class="h5 mb-0">
+                                    Итого: <b><span id="table-price-total">0.00</span></b> грн
+                                </div>
+                            </td>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col text-right">
+                            <button type="button" class="btn btn-sm btn-flat btn-warning">
+                                <i class="fa-regular fa-file-pdf"></i> Скачать в PDF
+                            </button>
+                            <button type="button" class="btn btn-sm btn-flat btn-success">
+                                <i class="fa-regular fa-credit-card"></i> Оплатить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script type="application/javascript">
+
+        let flatId = window.location.pathname.split('/invoices/')[1],
+            invoiceRequest = {};
+
+        $(document).ready(function () {
+            changePageTitleAndBreadcrumbs('Квитанции на оплату');
+            getAllStatus();
+            tableFilterInit();
+            getAllInvoicesByFlatByPage(invoiceRequest);
+        });
+
+        //  Change page title and breadcrumbs
+        function changePageTitleAndBreadcrumbs(page_title, breadcrumb_titles) {
+            const breadcrumb_path = $('.content-header.border-bottom'),
+                page_title_path = $(breadcrumb_path).find('h5');
+            let last_breadcrumb = $(breadcrumb_path).find('.breadcrumb-item').last();
+            $(breadcrumb_path).find('.breadcrumb-item.active').remove();
+            if (breadcrumb_titles === undefined) breadcrumb_titles = [page_title];
+            $(page_title_path).text(page_title);
+            $.each(breadcrumb_titles, function (i, e) {
+                last_breadcrumb = $(breadcrumb_path).find('.breadcrumb-item').last();
+                $(last_breadcrumb).after('<li class="breadcrumb-item active">' + e + '</li>');
+            });
+        }
+
+        // Status select filter init
+        function getAllStatus() {
+            $.ajax({
+                method: "GET",
+                url: "/invoices/get-all-status",
+                dataType: "json",
+                error: function (jqXHR, exception) {
+                    errorWarning();
+                    ajaxError(jqXHR, exception);
+                }
+            }).done(function (response) {
+                $.each(response, function (i, e) {
+                    $('#status-filter').append('<option value="' + e.value + '">' + e.title + '</option>');
+                })
+            });
+        }
+
+        //  Get All User Invoices by flat and page
+        function getAllInvoicesByFlatByPage(invoiceRequest) {
+            $.ajax({
+                method: "GET",
+                url: "/invoices/get-all-user-invoices-by-page",
+                data: invoiceRequest,
+                dataType: "json",
+                error: function (jqXHR, exception) {
+                    errorWarning();
+                    ajaxError(jqXHR, exception);
+                }
+            }).done(function (response) {
+                const table = $('table').first(),
+                    table_body = $(table).find('tbody'),
+                    table_foot = $(table).find('tfoot');
+                if ($(table_body).html().length > 0) $(table_body).empty();
+                if (response.data.length === 0) {
+                    const message_row =
+                        '<tr>' +
+                        '    <td colspan="6" class="align-middle text-center">Данных нет</td>' +
+                        '</tr>';
+                    $(table_body).append(message_row);
+                } else {
+                    $.each(response.data, function (i, e) {
+                        let status;
+                        if (e.status.value === 'PAID') status = '<span class="badge badge-success">' + e.status.title + '</span>';
+                        if (e.status.value === 'PARTLY_PAID') status = '<span class="badge badge-warning">' + e.status.title + '</span>';
+                        if (e.status.value === 'UNPAID') status = '<span class="badge badge-danger">' + e.status.title + '</span>';
+                        const row =
+                            '<tr>' +
+                            '    <td class="align-middle">' + e.uniqueNumber + '</td>' +
+                            '    <td class="align-middle">' + moment(e.requestedDate).format('DD.MM.YYYY') + '</td>' +
+                            '    <td class="align-middle">' + status + '</td>' +
+                            '    <td class="align-middle">' + formatter.format(e.totalAmount) + '</td>' +
+                            '</tr>';
+                        $(table_body).append(row);
+                    });
+                    if (response.pagesCount > 1 && $(table_foot).html().length === 0) {
+                        $(table_foot).append(
+                            '<tr>' +
+                            '   <td colspan="6" class="align-middle">' +
+                            '       <nav>' +
+                            '           <ul class="pagination pagination-sm justify-content-center m-0"></ul>' +
+                            '       </nav>' +
+                            '   </td>' +
+                            '</tr>'
+                        );
+                        $('.pagination').twbsPagination({
+                            totalPages: response.pagesCount,
+                            onPageClick: function (event, page) {
+                                getAllInvoicesByFlatByPage(flatId, page)
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function tableFilterInit() {
+            invoiceRequest.requestedDate = '';
+            invoiceRequest.status = '';
+            invoiceRequest.flatId = flatId === 'all' ? -1 : flatId;
+            invoiceRequest.pageIndex = 1;
+            invoiceRequest.pageSize = 10;
+            invoiceRequest.sortField = 'id';
+            invoiceRequest.sortOrder = 'desc';
+        }
+
+        // Show invoice by click on a row
+        $(document).on('click', 'table tbody tr', function () {
+            let invoiceUniqueNumber = $(this).find('td').first().text();
+            $.ajax({
+                method: "GET",
+                url: "/invoices/get-invoice-by-unique-number",
+                data: {uniqueNumber: invoiceUniqueNumber},
+                dataType: "json",
+                cache: true,
+            }).done(function (response) {
+                $('#table').attr('hidden', true);
+                $('#invoice').attr('hidden', false);
+                changePageTitleAndBreadcrumbs('Просмотр квитанции: №' + response.uniqueNumber, ['Квитанции', 'Просмотр квитанции: №' + response.uniqueNumber]);
+                const invoice_table = $('table').last(),
+                    invoice_table_body = $(invoice_table).find('tbody');
+                let total_price_sum = 0.00;
+                $.each(response.invoiceServices, function (i, e) {
+                    let row =
+                        '<tr>' +
+                        '<td class="align-middle">' + (i + 1) + '</td>' +
+                        '<td class="align-middle">' + e.service?.name + '</td>' +
+                        '<td class="align-middle">' + e.amount + '</td>' +
+                        '<td class="align-middle">' + e.service?.unit?.name + '</td>' +
+                        '<td class="align-middle">' + formatter.format(e.unitPrice) + '</td>' +
+                        '<td class="align-middle">' + formatter.format(e.totalPrice) + '</td>' +
+                        '</tr>';
+                    $(invoice_table_body).append(row);
+                    total_price_sum += e.totalPrice;
+                });
+                $('#table-price-total').text(formatter.format(total_price_sum));
+            });
+        });
+
+        //  Reset filter of table
+        $(document).on('click', '#reset-table', function (){
+            $('#date-filter').val('');
+            $('#status-filter').val('');
+            invoiceRequest.requestedDate = '';
+            invoiceRequest.status = '';
+            getAllInvoicesByFlatByPage(invoiceRequest);
+        });
+
+        //  Filter table by Date
+        $(document).on('change', '#date-filter', function () {
+            invoiceRequest.requestedDate = $(this).val();
+            getAllInvoicesByFlatByPage(invoiceRequest);
+        });
+
+        //  Filter table by Status
+        $(document).on('change', '#status-filter', function () {
+            invoiceRequest.status = $(this).val();
+            getAllInvoicesByFlatByPage(invoiceRequest);
+        });
+
+    </script>
+</th:block>
+
+</html>

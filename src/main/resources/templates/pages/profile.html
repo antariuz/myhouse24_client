@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template/index.html}" lang="ru">
+
+<th:block layout:fragment="content">
+
+    <div class="row animate__animated animate__fadeIn" id="show-profile">
+        <div class="col">
+            <div class="card card-outline card-secondary text-center ">
+                <div class="card-body">
+                    <img class="img-thumbnail img-responsive img-circle w-25" id="profile-avatar"
+                         src="/img/default_avatar.jpg" alt="Аватар">
+                    <h3 class="text-center" id="profile-full-name"></h3>
+                    <p class="text-muted text-center">Владелец квартиры</p>
+                    <ul class="list-group list-group-unbordered" id="user-information-rows"></ul>
+                    <button type="button" onclick="editAction(user);" class="btn btn-primary btn-block mt-3">
+                        Изменить
+                    </button>
+                </div>
+            </div>
+            <div class="card card-outline card-secondary">
+                <div class="card-header">
+                    <h5 class="card-title">Обо мне (заметки)</h5>
+                </div>
+                <div class="card-body">
+                    <p id="profile-notes"></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-9" id="user-flats"></div>
+    </div>
+
+    <div class="row animate__animated animate__fadeIn" id="profile" hidden>
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <form id="user-form">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <input type="hidden" class="form-control ignore" id="id">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="row">
+                                    <div class="col-2">
+                                        <img class="img-circle img-responsive w-100 profile-image-preview"
+                                             src="/img/default_avatar.jpg"
+                                             alt="profile_image">
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="profile-image">Сменить изображение</label><br>
+                                            <input type="file" id="profile-image" accept="image/jpeg, image/png">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="lastname">Фамилия</label>
+                                    <input type="text" class="form-control ignore" id="lastname" name="lastname">
+                                </div>
+                                <div class="form-group">
+                                    <label for="firstname">Имя</label>
+                                    <input type="text" class="form-control ignore" id="firstname" name="firstname">
+                                </div>
+                                <div class="form-group">
+                                    <label for="middleName">Отчество</label>
+                                    <input type="text" class="form-control ignore" id="middleName" name="middleName">
+                                </div>
+                                <div class="form-group">
+                                    <label for="birthdate">Дата рождения</label>
+                                    <input type="date" class="form-control ignore" id="birthdate" name="birthdate">
+                                </div>
+                                <h5 class="border-bottom">Контактные данные</h5>
+                                <div class="form-group">
+                                    <label for="phoneNumber">Телефон</label>
+                                    <input type="text" class="form-control ignore" id="phoneNumber" name="phoneNumber">
+                                </div>
+                                <div class="form-group">
+                                    <label for="viberLogin">Viber</label>
+                                    <input type="text" class="form-control ignore" id="viberLogin" name="viberLogin">
+                                </div>
+                                <div class="form-group">
+                                    <label for="telegramLogin">Telegram</label>
+                                    <input type="text" class="form-control ignore" id="telegramLogin"
+                                           name="telegramLogin">
+                                </div>
+                                <div class="form-group">
+                                    <label for="email">Email (логин)</label>
+                                    <input type="text" class="form-control" id="email" name="email">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="uniqueId">ID</label>
+                                    <input type="text" class="form-control ignore" id="uniqueId" disabled>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notes">Обо мне (заметки)</label>
+                                    <textarea class="form-control ignore" style="min-height: 340px" id="notes"
+                                              name="notes"></textarea>
+                                </div>
+                                <h5 class="border-bottom">Изменить пароль</h5>
+                                <div class="form-group">
+                                    <label for="password">Пароль</label>
+                                    <div class="input-group mb-3">
+                                        <input type="password" data-size="16" data-character-set="a-z,A-Z,0-9,#"
+                                               class="form-control pass-value" id="password" name="password">
+                                        <div class="input-group-append">
+                                            <a type="button" class="btn btn-secondary btn-flat generatePass">
+                                                Сгенерировать
+                                            </a>
+                                            <a type="button" class="btn btn-primary btn-flat" id="showPass">
+                                                <i class="fa fa-eye" aria-hidden="true"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="passwordConfirm">Повторить пароль</label>
+                                    <input type="password" class="form-control pass-value" id="passwordConfirm"
+                                           name="passwordConfirm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <a class="btn btn-secondary" href="/profile">Отменить</a>
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script type="application/javascript">
+
+        const page_title = "Профиль",
+            breadcrumb = page_title,
+            breadcrumb_path = $('.content-header.border-bottom');
+        $(breadcrumb_path).find('h5').text(page_title);
+        $(breadcrumb_path).find('.breadcrumb-item').after('<li class="breadcrumb-item active">' + breadcrumb + '</li>');
+        let user;
+
+        $(document).ready(function () {
+            showUserData();
+        });
+
+        function showUserData() {
+            $.ajax({
+                method: "GET",
+                url: "profile/get-user",
+                dataType: "json",
+                cache: true,
+            }).done(function (response) {
+                user = response;
+                $('#profile-full-name').text(response.fullName);
+                if (response.profileImage != null) $('#profile-avatar').attr("src", '/uploaded/users/' + response.profileImage);
+                const user_information = $('#user-information-rows');
+                response.phoneNumber ? $(user_information).append(
+                    $('<li>').attr({class: 'list-group-item d-flex justify-content-between align-items-center'})
+                        .append($('<span>').append('Телефон'))
+                        .append($('<span>').attr({class: 'pull-right'}).append(response.phoneNumber))
+                ) : '';
+                response.viberLogin ? $(user_information).append(
+                    $('<li>').attr({class: 'list-group-item d-flex justify-content-between align-items-center'})
+                        .append($('<span>').append('Viber'))
+                        .append($('<span>').attr({class: 'pull-right'}).append(response.viberLogin))
+                ) : '';
+                response.telegramLogin ? $(user_information).append(
+                    $('<li>').attr({class: 'list-group-item d-flex justify-content-between align-items-center'})
+                        .append($('<span>').append('Telegram'))
+                        .append($('<span>').attr({class: 'pull-right'}).append(response.telegramLogin))
+                ) : '';
+                $(user_information).append(
+                    $('<li>').attr({class: 'list-group-item d-flex justify-content-between align-items-center'})
+                        .append($('<span>').append('Email'))
+                        .append($('<span>').attr({class: 'pull-right'}).append(response.email))
+                );
+                $('#profile-notes').text(response.notes);
+                if (response.flats.length > 0) {
+                    const user_flats = $('#user-flats');
+                    $(user_flats).append('<h5>Мои квартиры</h5>');
+                    $.each(response.flats, function (i, e) {
+                        $(user_flats).append(
+                            '<div class="card card-outline card-secondary flat-card-' + i + '">' +
+                            '    <div class="card-header">' +
+                            '        <h5 class="card-title">Описание квартиры</h5>' +
+                            '    </div>' +
+                            '    <div class="card-body">' +
+                            '        <div class="row">' +
+                            '            <div class="col flat-title"></div>' +
+                            '        </div>' +
+                            '        <div class="row mt-3">' +
+                            '            <div class="col">' +
+                            '                <img src="/img/empty-image.jpg" alt="image-1" class="img-fluid">' +
+                            '            </div>' +
+                            '            <div class="col">' +
+                            '                <div class="row mb-2">' +
+                            '                    <div class="col">' +
+                            '                        <img src="/img/empty-image.jpg" alt="image-2" class="img-fluid">' +
+                            '                    </div>' +
+                            '                    <div class="col">' +
+                            '                        <img src="/img/empty-image.jpg" alt="image-3" class="img-fluid">' +
+                            '                    </div>' +
+                            '                </div>' +
+                            '                <div class="row">' +
+                            '                    <div class="col">' +
+                            '                        <img src="/img/empty-image.jpg" alt="image-4" class="img-fluid">' +
+                            '                    </div>' +
+                            '                    <div class="col">' +
+                            '                        <img src="/img/empty-image.jpg" alt="image-5" class="img-fluid">' +
+                            '                    </div>' +
+                            '                </div>' +
+                            '            </div>' +
+                            '        </div>' +
+                            '        <div class="row mt-3">' +
+                            '            <div class="col-12">' +
+                            '                <table class="table table-striped table-bordered table-hover table-sm table-responsive">' +
+                            '                    <thead>' +
+                            '                    <tr>' +
+                            '                        <td colspan="2"><b>Описание</b></td>' +
+                            '                    </tr>' +
+                            '                    </thead>' +
+                            '                    <tbody>' +
+                            '                    <tr>' +
+                            '                        <td class="text-nowrap">Название дома</td>' +
+                            '                        <td class="w-100 building-title"></td>' +
+                            '                    </tr>' +
+                            '                    <tr>' +
+                            '                        <td>№ квартиры</td>' +
+                            '                        <td class="flat-number"></td>' +
+                            '                    </tr>' +
+                            '                    <tr>' +
+                            '                        <td>Площадь</td>' +
+                            '                        <td class="flat-squire"></td>' +
+                            '                    </tr>' +
+                            '                    <tr>' +
+                            '                        <td>Этаж</td>' +
+                            '                        <td class="floor"></td>' +
+                            '                    </tr>' +
+                            '                    <tr>' +
+                            '                        <td>Секция</td>' +
+                            '                        <td class="section"></td>' +
+                            '                    </tr>' +
+                            '                    <tr>' +
+                            '                        <td>Лицевой счет</td>' +
+                            '                        <td class="account"></td>' +
+                            '                    </tr>' +
+                            '                    </tbody>' +
+                            '                </table>' +
+                            '            </div>' +
+                            '        </div>' +
+                            '    </div>' +
+                            '</div>'
+                        );
+                        let current_flat_title = e.building.title + ", " + e.building.address + ", кв." + e.number;
+                        let current_flat_card = $('.flat-card-' + i);
+                        $(current_flat_card).find('.flat-title').text(current_flat_title);
+                        $(current_flat_card).find('.building-title').text(e.building.title);
+                        $(current_flat_card).find('.flat-number').text(e.number);
+                        $(current_flat_card).find('.flat-squire').text(e.totalSquare);
+                        $(current_flat_card).find('.floor').text(e.floor?.name);
+                        $(current_flat_card).find('.section').text(e.section?.name);
+                        $(current_flat_card).find('.account').text(e.account?.uniqueNumber);
+                        let current_flat_images = $(current_flat_card).find('.img-fluid');
+                        if (e.building.image1) $(current_flat_images[0]).attr('src', '/uploaded/buildings/' + e.building.id + '/' + e.building.image1);
+                        if (e.building.image2) $(current_flat_images[1]).attr('src', '/uploaded/buildings/' + e.building.id + '/' + e.building.image2);
+                        if (e.building.image3) $(current_flat_images[2]).attr('src', '/uploaded/buildings/' + e.building.id + '/' + e.building.image3);
+                        if (e.building.image4) $(current_flat_images[3]).attr('src', '/uploaded/buildings/' + e.building.id + '/' + e.building.image4);
+                        if (e.building.image5) $(current_flat_images[4]).attr('src', '/uploaded/buildings/' + e.building.id + '/' + e.building.image5);
+                    });
+                }
+            });
+        }
+
+        //  Edit button action
+        function editAction(user) {
+            $(breadcrumb_path).find('.breadcrumb-item').last().after('<li class="breadcrumb-item active">Редактирование</li>');
+            $('#show-profile').attr('hidden', true);
+            $('#profile').attr('hidden', false);
+            if (user.profileImage != null) $('img.img-circle').attr("src", '/uploaded/users/' + user.profileImage);
+            $('#id').val(user.id);
+            $('#uniqueId').val(user.uniqueId);
+            $('#lastname').val(user.lastname);
+            $('#firstname').val(user.firstname);
+            $('#middleName').val(user.middleName);
+            console.log(moment(new Date(user.birthdate)).format('YYYY-MM-DD'));
+            if (user.birthdate) $('#birthdate').val(moment(new Date(user.birthdate)).format('YYYY-MM-DD'));
+            $('#notes').val(user.notes);
+            $('#phoneNumber').val(user.phoneNumber);
+            $('#viberLogin').val(user.viberLogin);
+            $('#telegramLogin').val(user.telegramLogin);
+            $('#email').val(user.email);
+            initValidation();
+        }
+
+        //  Auto preview of image
+        $(document).on('change', '#profile-image', function () {
+            $('.profile-image-preview')[0].src = URL.createObjectURL(event.target.files[0]);
+        });
+        function initValidation(){
+            $('#user-form').validate({
+                ignore: ".ignore",
+                rules: {
+                    email: {
+                        required: true,
+                        email: true,
+                        remote: {
+                            url: "profile/email-check",
+                            async: false,
+                            method: "POST",
+                            data: {
+                                id: function () {
+                                    return $("#id").val();
+                                }
+                            },
+                            error: function (jqXHR, exception) {
+                                errorWarning();
+                                ajaxError(jqXHR, exception);
+                            }
+                        }
+                    },
+                    password: {
+                        minlength: 5,
+                        equalTo: "#passwordConfirm"
+                    },
+                    passwordConfirm: {
+                        minlength: 5,
+                        equalTo: "#password"
+                    }
+                },
+                messages: {
+                    email: {
+                        required: "Введите эл.почту",
+                        email: "Ввведите правильную эл.почту",
+                        remote: "Эта эл.почта уже занята. Пожалуйста, укажите другую"
+                    },
+                    password: {
+                        minlength: "Пароль должен быть как минимум из 5 символов",
+                        equalTo: "Введенные пароли не совпадают"
+                    },
+                    passwordConfirm: {
+                        minlength: "Пароль должен быть как минимум из 5 символов",
+                        equalTo: "Введенные пароли не совпадают"
+                    }
+                },
+                submitHandler: function (form, event) {
+                    event.preventDefault();
+                    updateAction();
+                }
+            });
+        }
+
+        //  Update button action
+        function updateAction() {
+            let formData = new FormData();
+
+            let user = {};
+            user.id = $('#id').val();
+            user.email = $('#email').val();
+            if ($('#password').val() !== '') user.password = $('#password').val();
+
+            let profile = {};
+            profile.birthdate = $('#birthdate').val();
+            profile.firstname = $('#firstname').val();
+            profile.middleName = $('#middleName').val();
+            profile.lastname = $('#lastname').val();
+            profile.notes = $('#notes').val();
+            profile.phoneNumber = $('#phoneNumber').val();
+            profile.telegramLogin = $('#telegramLogin').val();
+            profile.viberLogin = $('#viberLogin').val();
+
+            user.profile = profile;
+
+            const userJSONBlob = new Blob([JSON.stringify(user)], {
+                type: 'application/json'
+            });
+
+            formData.append('user', userJSONBlob);
+
+            formData.append('profileImage', $('#profile-image')[0].files[0]);
+
+            $.ajax({
+                method: 'PUT',
+                url: 'profile/' + user.id + '/update',
+                data: formData,
+                enctype: 'multipart/form-data',
+                processData: false,
+                contentType: false,
+                error: function (jqXHR, exception) {
+                    errorWarning();
+                    ajaxError(jqXHR, exception);
+                }
+            }).done(function () {
+                successWarning('Успешно обновлено');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            });
+        }
+
+        //  Generate password button action
+        $(document).on('click', '.generatePass', function () {
+            $(this).parents('#user-form').find('.pass-value').val(randString('input.pass-value'));
+            $('#password, #passwordConfirm').valid();
+        });
+
+        //  Generate password
+        function randString(id) {
+            let dataSet = $(id).attr('data-character-set').split(',');
+            let possible = '';
+            if ($.inArray('a-z', dataSet) >= 0) {
+                possible += 'abcdefghijklmnopqrstuvwxyz';
+            }
+            if ($.inArray('A-Z', dataSet) >= 0) {
+                possible += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            }
+            if ($.inArray('0-9', dataSet) >= 0) {
+                possible += '0123456789';
+            }
+            if ($.inArray('#', dataSet) >= 0) {
+                possible += '![]{}()%&*$#^<>~@|';
+            }
+            let text = '';
+            for (let i = 0; i < $(id).attr('data-size'); i++) {
+                text += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return text;
+        }
+
+        //  Show hide password inputs
+        $(document).on('click', '#showPass', function () {
+            let inputText = $('#user-form').find('.pass-value');
+            if (inputText.prop('type') === 'password') {
+                inputText.prop('type', 'text');
+                $(this).children().removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                inputText.prop('type', 'password');
+                $(this).children().removeClass('fa-eye-slash').addClass('fa-eye');
+            }
+        });
+
+
+    </script>
+</th:block>
+
+</html>

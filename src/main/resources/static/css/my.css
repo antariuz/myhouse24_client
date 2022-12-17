@@ -1,0 +1,23 @@
+.custom-file-input ~ .custom-file-label::after {
+    content: "Выберите";
+}
+
+.img-fluid {
+    max-height: 300px;
+    max-width: 100%;
+}
+
+.badge {
+    min-width: 10px;
+    display: inline-block;
+}
+
+.navbar-nav > .user-menu > .dropdown-menu > li.user-header {
+    height: auto;
+}
+
+.dropdown-item:focus, .dropdown-item:hover {
+    color: #fff;
+    text-decoration: none;
+    background-color: #20c997;
+}
