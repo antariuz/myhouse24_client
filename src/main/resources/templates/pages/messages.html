@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template/index.html}" lang="ru">
+
+<th:block layout:fragment="content">
+
+    <div class="row animate__animated animate__fadeIn" id="page">
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-header">
+                    <button type="button" class="btn btn-sm btn-default" style="padding-left:-4px"
+                            onclick="checkAllMessages();">
+                        <i class="fa-regular fa-square"></i>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-default" style="padding-left:-4px"
+                            onclick="batchDelete();">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                    <div class="input-group input-group-sm float-right" style="width: 150px;">
+                        <input type="text" class="form-control" placeholder="Поиск" id="search">
+                        <div class="input-group-append">
+                            <a class="btn btn-default" onclick="searchMessage();">
+                                <i class="fas fa-search"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive-xl table-sm text-center">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col" style="width: 4%"></th>
+                            <th scope="col" style="width: 16%">От кого</th>
+                            <th scope="col" style="width: 48%">Текст</th>
+                            <th scope="col" style="width: 32%">Дата</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row animate__animated animate__fadeIn" id="message" hidden>
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-header">
+                    <div class="card-title">
+                        <h6 style="margin: 0"><b><span id="show-subject"></span></b><br>
+                            <span id="show-staff">От: </span>
+                        </h6>
+                    </div>
+                    <div class="card-tools">
+                        <span id="show-createdAt"></span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row pt-3">
+                        <div class="col-12">
+                            <span id="show-text"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="row">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-danger" onclick="deleteAction(currentMessageId)">
+                                <i class="fa-solid fa-trash-can"></i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script type="application/javascript">
+
+        let allMessagesByPage,
+            currentMessageId;
+
+        $(document).ready(function () {
+            changePageTitleAndBreadcrumbs('Сообщения');
+            const messageId = new URL(window.location.href).searchParams.get('id');
+            if (messageId !== null) {
+                showMessageById(messageId);
+            } else {
+                getUserAllMessagesByPage();
+            }
+        });
+
+        //  Change page title and breadcrumbs
+        function changePageTitleAndBreadcrumbs(page_title, breadcrumb_titles) {
+            const breadcrumb_path = $('.content-header.border-bottom'),
+                page_title_path = $(breadcrumb_path).find('h5');
+            let last_breadcrumb = $(breadcrumb_path).find('.breadcrumb-item').last();
+            if (breadcrumb_titles === undefined) breadcrumb_titles = [page_title];
+            $(page_title_path).text(page_title);
+            $.each(breadcrumb_titles, function (i, e) {
+                $(last_breadcrumb).after('<li class="breadcrumb-item active">' + e + '</li>');
+            });
+        }
+
+        // Check all messages
+        function checkAllMessages() {
+            $('i[class*="fa-square"]').toggleClass('fa-square fa-square-check');
+            let checkboxes = $('input[type=checkbox]');
+            checkboxes.prop("checked", !checkboxes.prop("checked"));
+        }
+
+        //  Get All User Messages by page
+        function getUserAllMessagesByPage(query, page, limit) {
+            $.ajax({
+                method: "GET",
+                url: "/messages/get-all-user-messages-by-page",
+                data: {subject: query ? query : "", pageIndex: page ? page : 1, pageSize: limit ? limit : 10},
+                dataType: "json"
+            }).done(function (response) {
+                allMessagesByPage = response.data;
+                const table = $('table').first(),
+                    table_body = $(table).find('tbody'),
+                    table_foot = $(table).find('tfoot');
+                if ($(table_body).html().length > 0) $(table_body).empty();
+                if (response.data.length === 0) {
+                    const message_row =
+                        '<tr>' +
+                        '    <td colspan="6" class="align-middle text-center checkbox">Данных нет</td>' +
+                        '</tr>';
+                    $(table_body).append(message_row);
+                } else {
+                    $.each(response.data, function (i, e) {
+                        const row =
+                            '<tr>' +
+                            '    <td class="align-middle checkbox">' +
+                            '       <div class="custom-control custom-checkbox">' +
+                            '           <input class="custom-control-input" type="checkbox" id="customCheckbox-' + i + '" value="' + e.id + '">' +
+                            '           <label for="customCheckbox-' + i + '" class="custom-control-label"></label>' +
+                            '       </div>' +
+                            '    </td>' +
+                            '    <td class="align-middle">' + e.staff?.fullName + '</td>' +
+                            '    <td class="text-left"><b>' + e.subject + '</b> - ' + (e.text.length > 45 ? (e.text.substring(3, 45) + '...') : e.text.substring(3, e.text.length - 4)) + '</td>' +
+                            '    <td class="align-middle">' + moment(e.createdAt).format('DD.MM.YYYY - HH:MM') + '</td>' +
+                            '</tr>';
+                        $(table_body).append(row);
+                    });
+                    if (response.pagesCount > 1 && $(table_foot).html().length === 0) {
+                        $(table_foot).append(
+                            '<tr>' +
+                            '   <td colspan="6" class="align-middle">' +
+                            '       <nav>' +
+                            '           <ul class="pagination pagination-sm justify-content-center m-0"></ul>' +
+                            '       </nav>' +
+                            '   </td>' +
+                            '</tr>'
+                        );
+                        $('.pagination').twbsPagination({
+                            totalPages: response.pagesCount,
+                            onPageClick: function (event, page) {
+                                getUserAllMessagesByPage(page);
+                            }
+                        });
+                    }
+                }
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
+            });
+        }
+
+        // Search message by pressing Enter
+        $(document).on('keyup', '#search', function (e) {
+            if (e.which === 13) searchMessage();
+        });
+
+        // Filter messages by query
+        function searchMessage() {
+            let query = $('#search').val();
+            getUserAllMessagesByPage(query, 1);
+        }
+
+        function batchDelete() {
+            const checkedCheckboxes = $('input[type=checkbox]:checked');
+            if (checkedCheckboxes.length > 0) {
+                let toDeleteList = [];
+                $.each(checkedCheckboxes, function (i, e) {
+                    toDeleteList.push($(e).val());
+                });
+                deleteAction(toDeleteList);
+            }
+        }
+
+        //  Delete action
+        function deleteAction(ids) {
+            askWarning(function (confirmed) {
+                if (confirmed) {
+                    $.ajax({
+                        method: 'DELETE',
+                        url: 'messages/' + ids + '/delete',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
+                        }
+                    }).done(function () {
+                        successWarning('Успешно удалено');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }).fail(function (jqXHR, exception) {
+                        errorWarning();
+                        ajaxError(jqXHR, exception);
+                    });
+                }
+            });
+        }
+
+        // Show message by click on a row
+        $(document).on('click', 'table tbody td', function () {
+            if (!$(this).hasClass('checkbox')) {
+                currentMessageId = $(this).parents('tr').find('input[type=checkbox]').first().val();
+                showMessageById(currentMessageId);
+            }
+        });
+
+        //  Show message by ID
+        function showMessageById(id) {
+            $.ajax({
+                method: "GET",
+                url: "/messages/get-user-message/" + id,
+                dataType: "json"
+            }).done(function (response) {
+                changePageTitleAndBreadcrumbs('Сообщение');
+                $('#page').attr('hidden', true);
+                $('#message').attr('hidden', false);
+
+                $('#show-subject').text(response.subject);
+                $('#show-staff').append(response.staff?.fullName);
+                $('#show-createdAt').text(moment(response.createdAt).format('DD.MM.YYYY - HH:MM'));
+                $('#show-text').html(response.text);
+            }).fail(function () {
+                errorWarning('Ошибка', 'Сообщение не существует');
+                getUserAllMessagesByPage();
+            });
+        }
+
+    </script>
+</th:block>
+
+</html>

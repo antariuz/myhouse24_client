@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template/index.html}" lang="ru">
+
+<th:block layout:fragment="content">
+
+    <div class="row animate__animated animate__fadeIn" id="page">
+        <div class="col-4">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3 id="flat-balance">0,00<sup style="font-size: 20px">грн.</sup></h3>
+                    <p>Баланс по квартире</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-regular fa-money-bill-1"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3 id="account-number">Не создан</h3>
+                    <p>Лицевой счет</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-4">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>0<sup style="font-size: 20px">грн.</sup></h3>
+                    <p>Средний расход за месяц</p>
+                </div>
+                <div class="icon">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-header">
+                    <h5 class="card-title">Диаграмма расходов</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" style="height: 300px">
+                        <div class="col-6">
+                            <canvas id="firstDoughnut"></canvas>
+                        </div>
+                        <div class="col-6">
+                            <canvas id="secondDoughnut"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+                <!--                <div class="card-body">-->
+                <!--                    Недостаточно данных для отображения статистики-->
+                <!--                </div>-->
+            </div>
+        </div>
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-header">
+                    <h5 class="card-title">Диаграмма расходов по месяцам за год</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" style="height: 300px">
+                        <div class="col-12">
+                            <canvas id="chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script type="application/javascript">
+
+        const flatId = window.location.pathname.split('/summary/')[1];
+
+        $(document).ready(function () {
+            changePageTitleAndBreadcrumbs('Сводка - ' + flats.find(flat => flat.id === parseInt(flatId)).title);
+            getUserFlat(flatId);
+        });
+
+        //  Change page title and breadcrumbs
+        function changePageTitleAndBreadcrumbs(page_title, breadcrumb_titles) {
+            const breadcrumb_path = $('.content-header.border-bottom'),
+                page_title_path = $(breadcrumb_path).find('h5');
+            let last_breadcrumb = $(breadcrumb_path).find('.breadcrumb-item').last();
+            if (breadcrumb_titles === undefined) breadcrumb_titles = [page_title];
+            $(page_title_path).text(page_title);
+            $.each(breadcrumb_titles, function (i, e) {
+                $(last_breadcrumb).after('<li class="breadcrumb-item active">' + e + '</li>');
+            });
+        }
+
+        //  Get User Flat by flat ID
+        function getUserFlat(flatId) {
+            $.ajax({
+                method: "GET",
+                url: "/summary/get-user-flat",
+                data: {flatId: flatId},
+                dataType: "json"
+            }).done(function (response) {
+                console.info(response);
+                $('#account-number').text(response.account?.uniqueNumber);
+                $('#flat-balance').html(formatter.format(response.balance ?? 0) + '<sup style="font-size: 20px">грн.</sup>');
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
+            });
+        }
+
+        //  Charts
+        const prevMonthExpensesDoughnut = new Chart(document.getElementById('firstDoughnut').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Red',
+                    'Blue',
+                    'Yellow'
+                ],
+                datasets: [{
+                    data: [300, 50, 100],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'за предыдущий месяц'
+                    }
+                }
+            }
+        });
+        const yearExpensesDoughnut = new Chart(document.getElementById('secondDoughnut').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: [
+                    'Red',
+                    'Blue',
+                    'Yellow'
+                ],
+                datasets: [{
+                    label: 'My First Dataset',
+                    data: [300, 50, 100],
+                    backgroundColor: [
+                        'rgb(255, 99, 132)',
+                        'rgb(54, 162, 235)',
+                        'rgb(255, 205, 86)'
+                    ],
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'за текущий год'
+                    }
+                }
+            }
+        });
+
+        const yearExpensesByMonthsChart = new Chart(document.getElementById('chart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ["янв.", "февр.", "март", "апр.", "май", "июнь", "июль", "авг.", "сент.", "окт.", "нояб.", "дек."],
+                datasets: [
+                    {
+                        data: [0, 1000, 2221.15, 3423.21, 2000.12, 3000, 5000, 6000, 7000, 8000, 9000, 10000],
+                        borderColor: "rgb(54, 162, 235)",
+                        backgroundColor: "rgb(54, 162, 235)",
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+
+    </script>
+</th:block>
+
+</html>

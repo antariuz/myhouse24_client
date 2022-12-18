@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template/index.html}" lang="ru">
+
+<th:block layout:fragment="content">
+
+    <div class="row animate__animated animate__fadeIn" id="page">
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive-xl table-sm text-center">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col" style="width: 50%">Услуга</th>
+                            <th scope="col" style="width: 25%">Ед. изм.</th>
+                            <th scope="col" style="width: 25%">Цена за ед., грн.</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script type="application/javascript">
+
+        let flatId = window.location.pathname.split('/tariffs/')[1];
+
+        $(document).ready(function () {
+            changePageTitleAndBreadcrumbs('Тарифы - ' + flats.find(flat => flat.id === parseInt(flatId)).title);
+            getTariffByFlat(flatId);
+        });
+
+        //  Change page title and breadcrumbs
+        function changePageTitleAndBreadcrumbs(page_title, breadcrumb_titles) {
+            const breadcrumb_path = $('.content-header.border-bottom'),
+                page_title_path = $(breadcrumb_path).find('h5');
+            let last_breadcrumb = $(breadcrumb_path).find('.breadcrumb-item').last();
+            if (breadcrumb_titles === undefined) breadcrumb_titles = [page_title];
+            $(page_title_path).text(page_title);
+            $.each(breadcrumb_titles, function (i, e) {
+                $(last_breadcrumb).after('<li class="breadcrumb-item active">' + e + '</li>');
+            });
+        }
+
+        //  Get Tariff by flat
+        function getTariffByFlat(flatId) {
+            $.ajax({
+                method: "GET",
+                url: "/tariffs/get-tariff-by-flat",
+                data: {flatId: flatId === 'all' ? -1 : flatId},
+                dataType: "json",
+                error: function (jqXHR, exception) {
+                    errorWarning();
+                    ajaxError(jqXHR, exception);
+                }
+            }).done(function (response) {
+                console.info(response);
+                const table = $('table'),
+                    table_body = $(table).find('tbody');
+                if (response.tariffServices === undefined || response.tariffServices.length === 0) {
+                    const message_row =
+                        '<tr>' +
+                        '    <td colspan="6" class="align-middle text-center">Данных нет</td>' +
+                        '</tr>';
+                    $(table_body).append(message_row);
+                } else {
+                    $.each(response.tariffServices, function (i, e) {
+                        const row =
+                            '<tr>' +
+                            '    <td class="align-middle">' + e.service.name + '</td>' +
+                            '    <td class="align-middle">' + e.service.unit.name + '</td>' +
+                            '    <td class="align-middle">' + e.price + '</td>' +
+                            '</tr>';
+                        $(table_body).append(row);
+                    });
+                }
+            });
+        }
+
+    </script>
+</th:block>
+
+</html>

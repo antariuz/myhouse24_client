@@ -1,0 +1,40 @@
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/myh24
+    username: mh24
+    password: 123
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        temp:
+          use_jdbc_metadata_defaults: false
+        format_sql: false
+    database: postgresql
+    database-platform: postgresql
+    hibernate:
+      ddl-auto: update
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+      enabled: true
+
+server:
+  port: 8080
+  servlet:
+    application-display-name: myhouse24_client
+
+#logging:
+#  file:
+#    name: logs/myhouse24_client.log
+#  level:
+#    org:
+#      hibernate: info
+#      springframework: info
+#    root: info
+#  logback:
+#    rollingpolicy:
+#      max-file-size: 10MB

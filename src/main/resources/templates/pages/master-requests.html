@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{template/index.html}" lang="ru">
+
+<th:block layout:fragment="content">
+
+    <div class="row animate__animated animate__fadeIn" id="table">
+        <div class="col-12 text-right">
+            <button type="button" onclick="createNewAction();" class="btn btn-success mb-3 mr-3">Создать заявку</button>
+        </div>
+        <div class="col">
+            <div class="card card-outline card-secondary">
+                <div class="card-body">
+                    <table class="table table-bordered table-hover table-responsive-xl table-sm text-center">
+                        <thead class="thead-light">
+                        <tr>
+                            <th scope="col" style="width: 8%">№ заявки</th>
+                            <th scope="col" style="width: 12%">Тип мастера</th>
+                            <th scope="col" style="width: 57%">Описание</th>
+                            <th scope="col" style="width: 13%">Удобное время</th>
+                            <th scope="col" style="width: 7%">Статус</th>
+                            <th scope="col" style="width: 3%"></th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot></tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row animate__animated animate__fadeIn" id="create-new" hidden>
+        <div class="col-12">
+            <div class="card card-outline card-secondary">
+                <form id="master-request-form">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="role">Тип мастера</label>
+                                    <select class="custom-select" id="role" name="role">
+                                        <option value="">Выберите...</option>
+                                        <option value="0">Любой специалист</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="flat">Квартира</label>
+                                    <select class="custom-select" id="flat" name="flat">
+                                        <option value="">Выберите...</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="requestedDate">Дата работ</label>
+                                    <div class="input-group date" data-target-input="nearest">
+                                        <input type="text" class="form-control datetimepicker-input"
+                                               id="requestedDate" data-target="#requestedDate" name="requestedDate"/>
+                                        <div class="input-group-append" data-target="#requestedDate"
+                                             data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa-solid fa-calendar-days"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="requestedTime">Время работ</label>
+                                    <div class="input-group date" data-target-input="nearest">
+                                        <input type="text" class="form-control datetimepicker-input"
+                                               id="requestedTime" data-target="#requestedTime" name="requestedTime"/>
+                                        <div class="input-group-append" data-target="#requestedTime"
+                                             data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa-solid fa-clock"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class="form-group">
+                                    <label for="description">Описание</label>
+                                    <textarea class="form-control" rows="8" placeholder="Опишите проблему..."
+                                              id="description" name="description"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <a class="btn btn-secondary" href="/master-requests">Отменить</a>
+                                <button type="submit" class="btn btn-success">Сохранить</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+</th:block>
+
+<th:block layout:fragment="extra-js">
+    <script type="application/javascript">
+
+        $(document).ready(function () {
+            changePageTitleAndBreadcrumbs('Вызов мастера');
+            getUserMasterRequestsPage();
+        });
+
+        function createNewAction() {
+            changePageTitleAndBreadcrumbs('Новая заявка');
+            $('#table').attr('hidden', true);
+            $('#create-new').attr('hidden', false);
+            $('#requestedDate').datetimepicker({
+                locale: 'ru',
+                format: 'L',
+                allowInputToggle: true,
+                defaultDate: moment().format(),
+                useCurrent: false
+            });
+            $('#requestedTime').datetimepicker({
+                locale: 'ru',
+                format: 'HH:mm',
+                allowInputToggle: true,
+                defaultDate: moment().format(),
+                useCurrent: false
+            });
+            getRolesExceptDirectorAndManager();
+            getAllUserFlats();
+        }
+
+        //  Change page title and breadcrumbs
+        function changePageTitleAndBreadcrumbs(page_title, breadcrumb_titles) {
+            const breadcrumb_path = $('.content-header.border-bottom'),
+                page_title_path = $(breadcrumb_path).find('h5');
+            let last_breadcrumb = $(breadcrumb_path).find('.breadcrumb-item').last();
+            if (breadcrumb_titles === undefined) breadcrumb_titles = [page_title];
+            $(page_title_path).text(page_title);
+            $.each(breadcrumb_titles, function (i, e) {
+                $(last_breadcrumb).after('<li class="breadcrumb-item active">' + e + '</li>');
+            });
+        }
+
+        //  Get All User Master Requests by page
+        function getUserMasterRequestsPage(page, limit) {
+            $.ajax({
+                method: "GET",
+                url: "master-requests/get-all-user-master-requests-by-page",
+                data: {page: page ? page : 1, limit: limit ? limit : 10},
+                dataType: "json"
+            }).done(function (response) {
+                const table = $('table'),
+                    table_body = $(table).find('tbody'),
+                    table_foot = $(table).find('tfoot');
+                if ($(table_body).html().length > 0) $(table_body).empty();
+                if (response.data.length === 0) {
+                    const message_row =
+                        '<tr>' +
+                        '    <td colspan="6" class="align-middle text-center">Данных нет</td>' +
+                        '</tr>';
+                    $(table_body).append(message_row);
+                } else {
+                    $.each(response.data, function (i, e) {
+                        let status;
+                        if (e.status.value === 'NEW') status = '<span class="badge badge-primary">' + e.status.title + '</span>';
+                        if (e.status.value === 'IN_WORK') status = '<span class="badge badge-warning">' + e.status.title + '</span>';
+                        if (e.status.value === 'DONE') status = '<span class="badge badge-success">' + e.status.title + '</span>';
+                        const row =
+                            '<tr>' +
+                            '    <td class="align-middle">' + e.id + '</td>' +
+                            '    <td class="align-middle">' + e.role.title + '</td>' +
+                            '    <td class="align-middle text-left">' + e.description + '</td>' +
+                            '    <td class="align-middle">' + moment(e.requestedDate).format('DD.MM.YYYY - HH:MM') + '</td>' +
+                            '    <td class="align-middle">' + status + '</td>' +
+                            '    <td class="align-middle">' +
+                            '       <button type="button" class="btn btn-danger btn-sm deleteBtn" title="Удалить" ' + (e.status.value !== "NEW" ? "disabled" : "") + '>' +
+                            '           <i class="fa-solid fa-trash-can"></i>' +
+                            '       </button>' +
+                            '    </td>' +
+                            '</tr>';
+                        $(table_body).append(row);
+                    });
+                    if (response.pagesCount > 1 && $(table_foot).html().length === 0) {
+                        $(table_foot).append(
+                            '<tr>' +
+                            '   <td colspan="6" class="align-middle">' +
+                            '       <nav>' +
+                            '           <ul class="pagination pagination-sm justify-content-center m-0"></ul>' +
+                            '       </nav>' +
+                            '   </td>' +
+                            '</tr>'
+                        );
+                        $('.pagination').twbsPagination({
+                            totalPages: response.pagesCount,
+                            onPageClick: function (event, page) {
+                                getUserMasterRequestsPage(page)
+                            }
+                        });
+                    }
+                }
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
+            });
+        }
+
+        //  Delete button action
+        $(document).on('click', '.deleteBtn', function () {
+            const id = $(this).parents('tr').find('td').first().text();
+            askWarning(function (confirmed) {
+                if (confirmed) {
+                    $.ajax({
+                        method: 'DELETE',
+                        url: 'master-requests/' + id + '/delete',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
+                        }
+                    }).done(function () {
+                        successWarning('Успешно удалено');
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    }).fail(function (jqXHR, exception) {
+                        errorWarning();
+                        ajaxError(jqXHR, exception);
+                    });
+                }
+            });
+        });
+
+        //  Get Roles Except Director And Manager
+        function getRolesExceptDirectorAndManager() {
+            $.ajax({
+                method: "GET",
+                url: "master-requests/get-roles-except-director-and-manager",
+                dataType: "json"
+            }).done(function (response) {
+                $.each(response, function (i, element) {
+                    $('#role').append('<option value="' + element.id + '">' + element.title + '</option>');
+                });
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
+            });
+        }
+
+        //  Get All User Flats
+        function getAllUserFlats() {
+            $.ajax({
+                method: "GET",
+                url: "master-requests/get-all-user-flats",
+                dataType: "json"
+            }).done(function (response) {
+                $.each(response, function (i, element) {
+                    $('#flat').append('<option value="' + element.id + '">' + element.title + '</option>');
+                });
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
+            });
+        }
+
+        //  Validation
+        $('#master-request-form').validate({
+            ignore: ".ignore",
+            rules: {
+                role: {
+                    required: true
+                },
+                flat: {
+                    required: true
+                },
+                requestedDate: {
+                    required: true
+                },
+                requestedTime: {
+                    required: true
+                },
+                description: {
+                    required: true
+                }
+            },
+            messages: {
+                role: {
+                    required: "Выберите тип мастера"
+                },
+                flat: {
+                    required: "Выберите квартиру"
+                },
+                requestedDate: {
+                    required: "Укажите дату работ"
+                },
+                requestedTime: {
+                    required: "Укажите время работ"
+                },
+                description: {
+                    required: "Вкратце опишите проблему"
+                }
+            },
+            submitHandler: function (form, event) {
+                event.preventDefault();
+                saveAction();
+            }
+        });
+
+        //  Add button action
+        function saveAction() {
+            let masterRequest = {};
+            masterRequest.role = {id: $('#role').val()};
+            masterRequest.flat = {id: $('#flat').val()};
+            const date = $('#requestedDate').val();
+            const time = $('#requestedTime').val();
+            masterRequest.requestedDate = new Date(date.split('.')[2], (date.split('.')[1] - 1), date.split('.')[0], time.split(':')[0], time.split(':')[1]);
+            masterRequest.description = $('#description').val();
+
+            $.ajax({
+                method: 'POST',
+                url: 'master-requests/save',
+                contentType: 'application/json',
+                data: JSON.stringify(masterRequest),
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
+                }
+            }).done(function () {
+                successWarning('Успешно сохранено');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
+            });
+        }
+
+    </script>
+</th:block>
+
+</html>
