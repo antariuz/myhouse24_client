@@ -1,9 +1,9 @@
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/myh24
-    username: mh24
-    password: 123
+    url: jdbc:postgresql://localhost:5432/myhouse24
+    username: postgres
+    password: postgres
   jpa:
     show-sql: true
     properties:
@@ -27,14 +27,14 @@ server:
   servlet:
     application-display-name: myhouse24_client
 
-#logging:
-#  file:
-#    name: logs/myhouse24_client.log
-#  level:
-#    org:
-#      hibernate: info
-#      springframework: info
-#    root: info
-#  logback:
-#    rollingpolicy:
-#      max-file-size: 10MB
+logging:
+  file:
+    name: logs/myhouse24_client.log
+  level:
+    org:
+      hibernate: info
+      springframework: info
+    root: info
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
