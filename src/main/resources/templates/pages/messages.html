@@ -200,6 +200,9 @@
                     $.ajax({
                         method: 'DELETE',
                         url: 'messages/' + ids + '/delete',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
+                        }
                     }).done(function () {
                         successWarning('Успешно удалено');
                         setTimeout(() => {

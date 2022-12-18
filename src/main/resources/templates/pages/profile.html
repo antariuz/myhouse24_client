@@ -306,7 +306,8 @@
         $(document).on('change', '#profile-image', function () {
             $('.profile-image-preview')[0].src = URL.createObjectURL(event.target.files[0]);
         });
-        function initValidation(){
+
+        function initValidation() {
             $('#user-form').validate({
                 ignore: ".ignore",
                 rules: {
@@ -321,6 +322,9 @@
                                 id: function () {
                                     return $("#id").val();
                                 }
+                            },
+                            beforeSend: function (xhr) {
+                                xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
                             },
                             error: function (jqXHR, exception) {
                                 errorWarning();
@@ -395,15 +399,17 @@
                 enctype: 'multipart/form-data',
                 processData: false,
                 contentType: false,
-                error: function (jqXHR, exception) {
-                    errorWarning();
-                    ajaxError(jqXHR, exception);
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
                 }
             }).done(function () {
                 successWarning('Успешно обновлено');
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
             });
         }
 

@@ -155,11 +155,7 @@
                 method: "GET",
                 url: "master-requests/get-all-user-master-requests-by-page",
                 data: {page: page ? page : 1, limit: limit ? limit : 10},
-                dataType: "json",
-                error: function (jqXHR, exception) {
-                    errorWarning();
-                    ajaxError(jqXHR, exception);
-                }
+                dataType: "json"
             }).done(function (response) {
                 const table = $('table'),
                     table_body = $(table).find('tbody'),
@@ -186,10 +182,10 @@
                             '    <td class="align-middle">' + status + '</td>' +
                             '    <td class="align-middle">' +
                             '       <button type="button" class="btn btn-danger btn-sm deleteBtn" title="Удалить" ' + (e.status.value !== "NEW" ? "disabled" : "") + '>' +
-                                '           <i class="fa-solid fa-trash-can"></i>' +
-                                '       </button>' +
-                                '    </td>' +
-                                '</tr>';
+                            '           <i class="fa-solid fa-trash-can"></i>' +
+                            '       </button>' +
+                            '    </td>' +
+                            '</tr>';
                         $(table_body).append(row);
                     });
                     if (response.pagesCount > 1 && $(table_foot).html().length === 0) {
@@ -210,6 +206,9 @@
                         });
                     }
                 }
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
             });
         }
 
@@ -221,15 +220,17 @@
                     $.ajax({
                         method: 'DELETE',
                         url: 'master-requests/' + id + '/delete',
-                        error: function (jqXHR, exception) {
-                            errorWarning();
-                            ajaxError(jqXHR, exception);
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
                         }
                     }).done(function () {
                         successWarning('Успешно удалено');
                         setTimeout(() => {
                             window.location.reload();
                         }, 1500);
+                    }).fail(function (jqXHR, exception) {
+                        errorWarning();
+                        ajaxError(jqXHR, exception);
                     });
                 }
             });
@@ -240,15 +241,14 @@
             $.ajax({
                 method: "GET",
                 url: "master-requests/get-roles-except-director-and-manager",
-                dataType: "json",
-                error: function (jqXHR, exception) {
-                    errorWarning();
-                    ajaxError(jqXHR, exception);
-                }
+                dataType: "json"
             }).done(function (response) {
                 $.each(response, function (i, element) {
                     $('#role').append('<option value="' + element.id + '">' + element.title + '</option>');
                 });
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
             });
         }
 
@@ -257,15 +257,14 @@
             $.ajax({
                 method: "GET",
                 url: "master-requests/get-all-user-flats",
-                dataType: "json",
-                error: function (jqXHR, exception) {
-                    errorWarning();
-                    ajaxError(jqXHR, exception);
-                }
+                dataType: "json"
             }).done(function (response) {
                 $.each(response, function (i, element) {
                     $('#flat').append('<option value="' + element.id + '">' + element.title + '</option>');
                 });
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
             });
         }
 
@@ -327,15 +326,17 @@
                 url: 'master-requests/save',
                 contentType: 'application/json',
                 data: JSON.stringify(masterRequest),
-                error: function (jqXHR, exception) {
-                    errorWarning();
-                    ajaxError(jqXHR, exception);
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader($('#_csrf_header').attr('content'), $('#_csrf').attr('content'));
                 }
             }).done(function () {
                 successWarning('Успешно сохранено');
                 setTimeout(() => {
                     window.location.reload();
                 }, 1500);
+            }).fail(function (jqXHR, exception) {
+                errorWarning();
+                ajaxError(jqXHR, exception);
             });
         }
 
