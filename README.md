@@ -4,7 +4,7 @@ _management system for accounting and receipts for utility bills in co-owners as
 
 
 
-### Technology stack:
+### Stack of technologies:
 * Architecture: MVC
 * Frontend: AdminLTE template / HTML / CSS / Bootstrap/ jQuery / Ajax
 * Backend: Java / Spring Boot / Tomcat / WebSocket
