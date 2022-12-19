@@ -44,10 +44,10 @@ public class Init implements CommandLineRunner {
             profileRepo.save(profile);
             user.setProfile(profile);
             userRepo.save(user);
+            log.info("Testing user has been successfully created");
+            log.info("Login: test@gmail.com");
+            log.info("Password: password");
         }
-        log.info("Testing user has been successfully created");
-        log.info("Login: test@gmail.com");
-        log.info("Password: password");
 
     }
 }
