@@ -16,6 +16,7 @@ import java.util.List;
 public class Message extends MappedEntity {
 
     private String subject;
+    @Column(length = 104857)
     private String text;
     @ManyToMany
     @JoinTable(

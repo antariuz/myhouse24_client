@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MessageRepo extends JpaRepository<Message, Long>, JpaSpecificationExecutor<Message> {
 
-    Message getMessageByIdAndUsersId(Long id, Long userId);
+    Message getMessageByIdAndUsersId(Long messageId, Long userId);
 
 }

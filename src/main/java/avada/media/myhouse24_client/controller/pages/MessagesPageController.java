@@ -1,8 +1,8 @@
 package avada.media.myhouse24_client.controller.pages;
 
 import avada.media.myhouse24_client.model.dto.MessageDTO;
-import avada.media.myhouse24_client.model.response.ResponseByPage;
 import avada.media.myhouse24_client.model.request.MessageRequest;
+import avada.media.myhouse24_client.model.response.ResponseByPage;
 import avada.media.myhouse24_client.service.MessageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -32,7 +32,7 @@ public class MessagesPageController {
 
     @DeleteMapping("{ids}/delete")
     public ResponseEntity<Void> deleteMessagesById(@PathVariable List<Long> ids) {
-        messageService.deleteMessagesById(ids);
+        messageService.deleteMessagesById(SecurityContextHolder.getContext().getAuthentication().getName(), ids);
         return ResponseEntity.ok().build();
     }
 

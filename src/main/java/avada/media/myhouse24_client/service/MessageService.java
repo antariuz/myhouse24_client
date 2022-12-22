@@ -10,7 +10,7 @@ public interface MessageService {
 
     ResponseByPage<MessageDTO> getAllUserMessages(String userEmail, MessageRequest messageRequest);
 
-    void deleteMessagesById(List<Long> ids);
+    void deleteMessagesById(String userEmail, List<Long> ids);
 
     MessageDTO getUserMessage(String userEmail, Long id);
 
