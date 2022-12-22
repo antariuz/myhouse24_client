@@ -11,12 +11,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import javax.transaction.Transactional;
-
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class Init implements CommandLineRunner {
 
     private final UserRepo userRepo;
@@ -26,9 +23,8 @@ public class Init implements CommandLineRunner {
     @Override
     public void run(String... args) {
         log.info("Initialization checks");
-
         log.info("Checking for the testing user");
-        if (userRepo.existsByEmail("test@gmail.com") || userRepo.findAll().isEmpty()) {
+        if (userRepo.existsByEmail("test@gmail.com")) {
             log.info("Testing user have not been found");
             log.info("Creating user for testing purposes");
             User user = new User();
@@ -48,6 +44,9 @@ public class Init implements CommandLineRunner {
             log.info("Login: test@gmail.com");
             log.info("Password: password");
         }
-
+        log.info("Testing user has been found");
+        log.info("Login: test@gmail.com");
+        log.info("Password: password");
     }
+
 }
