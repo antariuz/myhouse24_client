@@ -3,6 +3,7 @@ package avada.media.myhouse24_client.model;
 import avada.media.myhouse24_client.model.common.MappedEntity;
 import avada.media.myhouse24_client.model.systemSettings.pages.Staff;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
@@ -13,9 +14,11 @@ import java.util.List;
 @Entity
 @Table
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Message extends MappedEntity {
 
     private String subject;
+    @Column(length = 104857)
     private String text;
     @ManyToMany
     @JoinTable(

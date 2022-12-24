@@ -16,7 +16,6 @@ import javax.transaction.Transactional;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class Init implements CommandLineRunner {
 
     private final UserRepo userRepo;
@@ -24,12 +23,12 @@ public class Init implements CommandLineRunner {
     private final PasswordEncoder passwordEncoder;
 
     @Override
+    @Transactional
     public void run(String... args) {
         log.info("Initialization checks");
-
         log.info("Checking for the testing user");
-        if (userRepo.existsByEmail("test@gmail.com") || userRepo.findAll().isEmpty()) {
-            log.info("Testing user have not been found");
+        if (!userRepo.existsByEmail("test@gmail.com")) {
+            log.warn("Testing user have not been found");
             log.info("Creating user for testing purposes");
             User user = new User();
             Profile profile = new Profile();
@@ -44,10 +43,13 @@ public class Init implements CommandLineRunner {
             profileRepo.save(profile);
             user.setProfile(profile);
             userRepo.save(user);
-        }
-        log.info("Testing user has been successfully created");
+            log.info("Testing user has been successfully created");
+            log.info("Login: test@gmail.com");
+            log.info("Password: password");
+        } else log.info("Testing user has been found");
+        log.info("Credentials for testing purposes:");
         log.info("Login: test@gmail.com");
         log.info("Password: password");
-
     }
+
 }

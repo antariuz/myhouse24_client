@@ -4,7 +4,7 @@ import avada.media.myhouse24_client.model.common.Image;
 import avada.media.myhouse24_client.model.common.MappedEntity;
 import avada.media.myhouse24_client.model.systemSettings.pages.Staff;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ import java.util.List;
 @Entity
 @Table
 @Data
-@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Building extends MappedEntity {
 
     private String title;

@@ -30,7 +30,7 @@
         <div class="col-4">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>0<sup style="font-size: 20px">грн.</sup></h3>
+                    <h3 id="flat-expenses">0,00<sup style="font-size: 20px">грн.</sup></h3>
                     <p>Средний расход за месяц</p>
                 </div>
                 <div class="icon">
@@ -44,19 +44,15 @@
                     <h5 class="card-title">Диаграмма расходов</h5>
                 </div>
                 <div class="card-body">
-                    <div class="row" style="height: 300px">
-                        <div class="col-6">
+                    <div class="row" style="height: 300px" id="doughnuts">
+                        <div class="col-6 text-center">
                             <canvas id="firstDoughnut"></canvas>
                         </div>
-                        <div class="col-6">
+                        <div class="col-6 text-center">
                             <canvas id="secondDoughnut"></canvas>
                         </div>
                     </div>
-
                 </div>
-                <!--                <div class="card-body">-->
-                <!--                    Недостаточно данных для отображения статистики-->
-                <!--                </div>-->
             </div>
         </div>
         <div class="col-12">
@@ -64,12 +60,8 @@
                 <div class="card-header">
                     <h5 class="card-title">Диаграмма расходов по месяцам за год</h5>
                 </div>
-                <div class="card-body">
-                    <div class="row" style="height: 300px">
-                        <div class="col-12">
-                            <canvas id="chart"></canvas>
-                        </div>
-                    </div>
+                <div class="card-body" id="diagram">
+                    Недостаточно данных для отображения статистики
                 </div>
             </div>
         </div>
@@ -104,115 +96,153 @@
         function getUserFlat(flatId) {
             $.ajax({
                 method: "GET",
-                url: "/summary/get-user-flat",
+                url: "/summary/get-user-flat-expenses-info",
                 data: {flatId: flatId},
                 dataType: "json"
             }).done(function (response) {
-                console.info(response);
-                $('#account-number').text(response.account?.uniqueNumber);
                 $('#flat-balance').html(formatter.format(response.balance ?? 0) + '<sup style="font-size: 20px">грн.</sup>');
+                $('#account-number').text(response.account);
+                $('#flat-expenses').html(formatter.format(response.averageMonthlyExpense ?? 0) + '<sup style="font-size: 20px">грн.</sup>');
+
+                //  Initialize the first doughnut
+                if (Object.keys(response.prevMonthServicesExpensesSum).length > 0) {
+                    initFirstDoughnut(Object.keys(response.prevMonthServicesExpensesSum), Object.values(response.prevMonthServicesExpensesSum));
+                } else {
+                    $('#firstDoughnut').parent('div')
+                        .empty()
+                        .text('Недостаточно данных для отображения статистики');
+                }
+
+                //  Initialize the second doughnut
+                if (Object.keys(response.yearExpensesSumByServices).length > 0) {
+                    initSecondDoughnut(Object.keys(response.yearExpensesSumByServices), Object.values(response.yearExpensesSumByServices));
+                } else {
+                    $('#secondDoughnut').parent('div')
+                        .empty()
+                        .text('Недостаточно данных для отображения статистики');
+                }
+
+                if (Object.keys(response.prevMonthServicesExpensesSum).length === 0 && Object.keys(response.yearExpensesSumByServices).length === 0) {
+                    const doughnuts = $('#doughnuts');
+                    $(doughnuts).parent('div')
+                        .text('Недостаточно данных для отображения статистики');
+                    $(doughnuts).empty();
+                }
+
+                //  Initialize diagram
+                console.info(response.yearExpensesSumByMonths);
+                if (response.yearExpensesSumByMonths.some(elem => elem > 0)) {
+                    $('#diagram')
+                        .empty()
+                        .append(
+                            '<div class="row" style="height: 300px">' +
+                            '   <div class="col-12">' +
+                            '       <canvas id="chart"></canvas>' +
+                            '   </div>' +
+                            '</div>'
+                        );
+                    diagramInit(response.yearExpensesSumByMonths);
+                }
             }).fail(function (jqXHR, exception) {
                 errorWarning();
                 ajaxError(jqXHR, exception);
             });
         }
 
-        //  Charts
-        const prevMonthExpensesDoughnut = new Chart(document.getElementById('firstDoughnut').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    'Red',
-                    'Blue',
-                    'Yellow'
-                ],
-                datasets: [{
-                    data: [300, 50, 100],
-                    backgroundColor: [
-                        'rgb(255, 99, 132)',
-                        'rgb(54, 162, 235)',
-                        'rgb(255, 205, 86)'
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    },
-                    title: {
-                        display: true,
-                        text: 'за предыдущий месяц'
-                    }
-                }
-            }
-        });
-        const yearExpensesDoughnut = new Chart(document.getElementById('secondDoughnut').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: [
-                    'Red',
-                    'Blue',
-                    'Yellow'
-                ],
-                datasets: [{
-                    label: 'My First Dataset',
-                    data: [300, 50, 100],
-                    backgroundColor: [
-                        'rgb(255, 99, 132)',
-                        'rgb(54, 162, 235)',
-                        'rgb(255, 205, 86)'
-                    ],
-                    hoverOffset: 4
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'bottom'
-                    },
-                    title: {
-                        display: true,
-                        text: 'за текущий год'
-                    }
-                }
-            }
-        });
-
-        const yearExpensesByMonthsChart = new Chart(document.getElementById('chart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ["янв.", "февр.", "март", "апр.", "май", "июнь", "июль", "авг.", "сент.", "окт.", "нояб.", "дек."],
-                datasets: [
-                    {
-                        data: [0, 1000, 2221.15, 3423.21, 2000.12, 3000, 5000, 6000, 7000, 8000, 9000, 10000],
-                        borderColor: "rgb(54, 162, 235)",
-                        backgroundColor: "rgb(54, 162, 235)",
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
+        function initFirstDoughnut(prevMonthExpensesSumNames, prevMonthExpensesSumValues) {
+            new Chart(document.getElementById('firstDoughnut').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: prevMonthExpensesSumNames,
+                    datasets: [{
+                        data: prevMonthExpensesSumValues,
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)'
+                        ],
+                        hoverOffset: 4
+                    }]
                 },
-                plugins: {
-                    legend: {
-                        display: false
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'за предыдущий месяц'
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
+
+        function initSecondDoughnut(prevMonthExpensesSumNames, prevMonthExpensesSumValues) {
+            new Chart(document.getElementById('secondDoughnut').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: prevMonthExpensesSumNames,
+                    datasets: [{
+                        label: 'My First Dataset',
+                        data: prevMonthExpensesSumValues,
+                        backgroundColor: [
+                            'rgb(255, 99, 132)',
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 205, 86)'
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom'
+                        },
+                        title: {
+                            display: true,
+                            text: 'за текущий год'
+                        }
+                    }
+                }
+            });
+        }
+
+        function diagramInit(yearExpensesSumByMonths) {
+            new Chart(document.getElementById('chart').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ["янв.", "февр.", "март", "апр.", "май", "июнь", "июль", "авг.", "сент.", "окт.", "нояб.", "дек."],
+                    datasets: [
+                        {
+                            data: yearExpensesSumByMonths,
+                            borderColor: "rgb(54, 162, 235)",
+                            backgroundColor: "rgb(54, 162, 235)",
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
 
     </script>
 </th:block>

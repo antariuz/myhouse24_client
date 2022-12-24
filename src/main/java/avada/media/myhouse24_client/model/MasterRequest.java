@@ -4,6 +4,7 @@ import avada.media.myhouse24_client.model.common.MappedEntity;
 import avada.media.myhouse24_client.model.systemSettings.pages.Role;
 import avada.media.myhouse24_client.model.systemSettings.pages.Staff;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,6 +15,7 @@ import java.util.Date;
 @Entity
 @Table
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class MasterRequest extends MappedEntity {
 
     private Date requestedDate;

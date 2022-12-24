@@ -2,7 +2,7 @@
 
 _management system for accounting and receipts for utility bills in co-owners association of an apartment building_
 
-The project is designed for learning and practice. All rights belong to <a href="https://avada-media.ua/"><strong>AVADA-MEDIA™</strong></a>
+This project has been developed for learning and practicing purposes. All rights belong to the <a href="https://avada-media.ua/"><strong>AVADA-MEDIA™</strong></a>
 
 ### Stack of technologies:
 * Architecture: MVC
@@ -12,8 +12,9 @@ The project is designed for learning and practice. All rights belong to <a href=
 * Data base: PostgreSQL
 
 ### Credentials for testing
-
-_For best experience you should use admin part first_
-
 * Login: test@gmail.com
 * Password: password
+
+### Note:
+
+_For best experience you should use admin part first_
