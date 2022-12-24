@@ -3,8 +3,8 @@ package avada.media.myhouse24_client.model;
 import avada.media.myhouse24_client.model.common.MappedEntity;
 import avada.media.myhouse24_client.model.systemSettings.pages.Tariff;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
@@ -15,7 +15,7 @@ import java.util.List;
 @Entity
 @Table
 @Data
-@NoArgsConstructor
+@EqualsAndHashCode(callSuper = true)
 public class Invoice extends MappedEntity {
 
     private String uniqueNumber;

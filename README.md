@@ -12,8 +12,9 @@ The project is designed for learning and practice. All rights belong to <a href=
 * Data base: PostgreSQL
 
 ### Credentials for testing
-
-_For best experience you should use admin part first_
-
 * Login: test@gmail.com
 * Password: password
+
+### Note:
+
+_For best experience you should use admin part first_

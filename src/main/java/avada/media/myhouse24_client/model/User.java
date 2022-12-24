@@ -1,8 +1,8 @@
 package avada.media.myhouse24_client.model;
 
 import avada.media.myhouse24_client.model.common.MappedEntity;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "_user")
 @Data
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@EqualsAndHashCode(callSuper = true)
 public class User extends MappedEntity implements UserDetails {
 
     private String uniqueId;

@@ -3,12 +3,14 @@ package avada.media.myhouse24_client.model;
 import avada.media.myhouse24_client.model.common.MappedEntity;
 import avada.media.myhouse24_client.model.systemSettings.pages.Tariff;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
 
 @Entity
 @Table
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class Flat extends MappedEntity {
 
     private Long number;
